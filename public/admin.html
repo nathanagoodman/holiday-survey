@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Survey Admin - Responses</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    color: #1a2a3a;
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+  .login-section {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 400px;
+    margin: 40px auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .login-section h2 { margin-bottom: 16px; color: #1a5276; }
+  .login-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #d5dde5;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    margin-bottom: 12px;
+  }
+  .login-input:focus { outline: none; border-color: #2e86c1; }
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .login-btn:active { opacity: 0.9; }
+
+  .stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1;
+    min-width: 140px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .stat-number { font-size: 32px; font-weight: 700; color: #2e86c1; }
+  .stat-label { font-size: 13px; color: #6b7c8d; margin-top: 4px; }
+
+  .actions { margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .action-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 2px solid #2e86c1;
+    background: white;
+    color: #2e86c1;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .action-btn:hover { background: #f0f7fd; }
+  .action-btn.primary { background: #2e86c1; color: white; }
+
+  .response-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .response-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a5276;
+    margin-bottom: 4px;
+  }
+  .response-time { font-size: 12px; color: #6b7c8d; margin-bottom: 12px; }
+  .rankings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .rank-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: #f8fafc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .rank-num {
+    font-weight: 700;
+    color: #2e86c1;
+    min-width: 24px;
+  }
+  .other-info {
+    font-size: 14px;
+    color: #4a5568;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+  .other-info strong { color: #1a5276; }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .summary-table th {
+    background: #1a5276;
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 14px;
+  }
+  .summary-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 14px;
+  }
+  .summary-table tr:nth-child(even) { background: #f8fafc; }
+
+  .hidden { display: none; }
+  .view-toggle { margin-bottom: 20px; }
+  #errorMsg { color: #dc3545; margin-top: 12px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Holiday Survey — Admin</h1>
+</div>
+
+<div class="container">
+  <!-- Login -->
+  <div id="loginSection" class="login-section">
+    <h2>Admin Access</h2>
+    <input type="password" class="login-input" id="adminKey" placeholder="Enter admin key" onkeydown="if(event.key==='Enter')loadResponses()">
+    <button class="login-btn" onclick="loadResponses()">View Responses</button>
+    <div id="errorMsg"></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number" id="totalCount">0</div>
+        <div class="stat-label">Total Responses</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="avgComplete">—</div>
+        <div class="stat-label">Most Wanted Off</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="action-btn primary" onclick="showView('individual')">Individual Responses</button>
+      <button class="action-btn" onclick="showView('summary')">Summary Table</button>
+      <button class="action-btn" onclick="exportCSV()">Export CSV</button>
+      <button class="action-btn" onclick="loadResponses()">Refresh</button>
+    </div>
+
+    <div id="individualView"></div>
+    <div id="summaryView" class="hidden"></div>
+  </div>
+</div>
+
+<script>
+let allResponses = [];
+let adminKey = '';
+
+const holidays = [
+  "Memorial Day weekend", "July 4th weekend", "Labor Day weekend",
+  "Thanksgiving", "Black Friday", "Weekend after Thanksgiving",
+  "Christmas Day", "Weekend after Christmas", "New Year's Day"
+];
+
+async function loadResponses() {
+  adminKey = document.getElementById('adminKey').value || adminKey;
+  if (!adminKey) { document.getElementById('errorMsg').textContent = 'Please enter the admin key.'; return; }
+
+  try {
+    const res = await fetch(`/api/responses?key=${encodeURIComponent(adminKey)}`);
+    if (res.status === 401) {
+      document.getElementById('errorMsg').textContent = 'Invalid admin key.';
+      return;
+    }
+    const data = await res.json();
+    allResponses = data.responses || [];
+
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    document.getElementById('totalCount').textContent = allResponses.length;
+
+    // Find most wanted off holiday (lowest average rank)
+    if (allResponses.length > 0) {
+      const avgRanks = {};
+      holidays.forEach(h => {
+        const ranks = allResponses.map(r => r.rankings[h]).filter(v => v != null);
+        avgRanks[h] = ranks.length ? ranks.reduce((a,b) => a+b, 0) / ranks.length : 99;
+      });
+      const best = Object.entries(avgRanks).sort((a,b) => a[1] - b[1])[0];
+      document.getElementById('avgComplete').textContent = best[0].split(' ')[0];
+      document.getElementById('avgComplete').title = `${best[0]} (avg rank: ${best[1].toFixed(1)})`;
+    }
+
+    renderIndividual();
+    renderSummary();
+  } catch (e) {
+    document.getElementById('errorMsg').textContent = 'Error loading responses.';
+  }
+}
+
+function renderIndividual() {
+  const el = document.getElementById('individualView');
+  if (allResponses.length === 0) {
+    el.innerHTML = '<div class="response-card" style="text-align:center;color:#6b7c8d">No responses yet.</div>';
+    return;
+  }
+  el.innerHTML = allResponses.map(r => {
+    const sorted = Object.entries(r.rankings).sort((a,b) => a[1] - b[1]);
+    const ranksHtml = sorted.map(([h, rank]) =>
+      `<div class="rank-item"><span class="rank-num">${rank}.</span><span>${h}</span></div>`
+    ).join('');
+    const otherHtml = r.otherDays && r.otherDays.length
+      ? `<div class="other-info"><strong>Also wants off:</strong> ${r.otherDays.join(', ')}</div>` : '';
+    const addlHtml = r.additional
+      ? `<div class="other-info"><strong>Notes:</strong> ${r.additional}</div>` : '';
+    const time = new Date(r.submittedAt).toLocaleString();
+    return `<div class="response-card">
+      <div class="response-name">${r.name}</div>
+      <div class="response-time">Submitted ${time}</div>
+      <div class="rankings-grid">${ranksHtml}</div>
+      ${otherHtml}${addlHtml}
+    </div>`;
+  }).join('');
+}
+
+function renderSummary() {
+  const el = document.getElementById('summaryView');
+  if (allResponses.length === 0) { el.innerHTML = ''; return; }
+
+  const names = allResponses.map(r => r.name);
+  let headerCells = '<th>Holiday</th>' + names.map(n => `<th>${n}</th>`).join('') + '<th>Avg Rank</th>';
+
+  const rows = holidays.map(h => {
+    const cells = allResponses.map(r => `<td>${r.rankings[h] || '—'}</td>`).join('');
+    const ranks = allResponses.map(r => r.rankings[h]).filter(v => v != null);
+    const avg = ranks.length ? (ranks.reduce((a,b) => a+b, 0) / ranks.length).toFixed(1) : '—';
+    return `<tr><td><strong>${h}</strong></td>${cells}<td><strong>${avg}</strong></td></tr>`;
+  });
+
+  el.innerHTML = `<div style="overflow-x:auto"><table class="summary-table"><thead><tr>${headerCells}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+}
+
+function showView(view) {
+  document.getElementById('individualView').classList.toggle('hidden', view !== 'individual');
+  document.getElementById('summaryView').classList.toggle('hidden', view !== 'summary');
+}
+
+function exportCSV() {
+  if (allResponses.length === 0) return;
+  const headers = ['Name', ...holidays, 'Other Days Off', 'Additional Notes', 'Submitted At'];
+  const csvRows = [headers.join(',')];
+  allResponses.forEach(r => {
+    const row = [
+      `"${r.name}"`,
+      ...holidays.map(h => r.rankings[h] || ''),
+      `"${(r.otherDays || []).join('; ')}"`,
+      `"${(r.additional || '').replace(/"/g, '""')}"`,
+      `"${r.submittedAt}"`
+    ];
+    csvRows.push(row.join(','));
+  });
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'holiday_survey_responses.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

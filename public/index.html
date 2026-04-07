@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Holiday Preference Survey</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    color: #1a2a3a;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    padding: 28px 20px 24px;
+    text-align: center;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .header p { font-size: 14px; opacity: 0.85; line-height: 1.4; }
+  .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+  .section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a5276;
+    margin-bottom: 4px;
+  }
+  .section-subtitle {
+    font-size: 13px;
+    color: #6b7c8d;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+  .name-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #d5dde5;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .name-input:focus { outline: none; border-color: #2e86c1; }
+
+  .holiday-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .holiday-row.has-value { border-color: #d4edda; background: #f0faf3; }
+  .holiday-row.duplicate { border-color: #f5c6cb; background: #fff5f5; }
+  .holiday-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .rank-select {
+    width: 64px;
+    height: 44px;
+    border: 2px solid #d5dde5;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    background: white;
+    color: #1a5276;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7c8d' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px;
+    padding-left: 12px;
+  }
+  .rank-select:focus { outline: none; border-color: #2e86c1; }
+  .rank-select.filled { border-color: #28a745; background-color: #f0faf3; }
+  .rank-select.duplicate-select { border-color: #dc3545; background-color: #fff5f5; }
+
+  .progress-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2e86c1, #28a745);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  .progress-text {
+    font-size: 12px;
+    color: #6b7c8d;
+    text-align: right;
+    margin-bottom: 6px;
+  }
+
+  .error-msg {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+    font-weight: 500;
+  }
+  .error-msg.visible { display: block; }
+
+  textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #d5dde5;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  textarea:focus { outline: none; border-color: #2e86c1; }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .checkbox-row:active { background: #edf2f7; }
+  .checkbox-row input[type="checkbox"] {
+    width: 22px; height: 22px; margin-right: 12px; flex-shrink: 0;
+    accent-color: #2e86c1;
+  }
+  .checkbox-label { font-size: 15px; font-weight: 500; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .success-screen.visible { display: block; }
+  .success-icon { font-size: 64px; margin-bottom: 16px; }
+  .success-title { font-size: 24px; font-weight: 700; color: #1a5276; margin-bottom: 8px; }
+  .success-msg { font-size: 16px; color: #6b7c8d; line-height: 1.5; }
+
+  .form-content { display: block; }
+  .form-content.hidden { display: none; }
+
+  .spinner {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Holiday Preference Survey</h1>
+  <p>Help us create the fairest holiday schedule possible</p>
+</div>
+
+<div class="container">
+  <div class="form-content" id="formContent">
+
+    <!-- Name -->
+    <div class="section">
+      <div class="section-title">1. Your Name</div>
+      <div class="section-subtitle">So we know whose preferences these are</div>
+      <input type="text" class="name-input" id="nameInput" placeholder="Enter your full name" autocomplete="name">
+    </div>
+
+    <!-- Rankings -->
+    <div class="section">
+      <div class="section-title">2. Rank the Holidays</div>
+      <div class="section-subtitle">From most desired off (1) to most okay working (9). Use each number exactly once.</div>
+      <div class="progress-text" id="progressText">0 of 9 ranked</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div id="holidayList"></div>
+      <div class="error-msg" id="rankError">Each number can only be used once. Please fix the duplicates highlighted in red.</div>
+    </div>
+
+    <!-- Non-major holidays -->
+    <div class="section">
+      <div class="section-title">3. Other Important Days Off</div>
+      <div class="section-subtitle">Check any of these that are also important for you to have off if possible:</div>
+      <label class="checkbox-row">
+        <input type="checkbox" id="chk_mothers" value="Mother's Day">
+        <span class="checkbox-label">Mother's Day</span>
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" id="chk_fathers" value="Father's Day">
+        <span class="checkbox-label">Father's Day</span>
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" id="chk_easter" value="Easter">
+        <span class="checkbox-label">Easter</span>
+      </label>
+    </div>
+
+    <!-- Additional info -->
+    <div class="section">
+      <div class="section-title">4. Anything Else?</div>
+      <div class="section-subtitle">If there's anything else you'd like us to know about your preferences, share it here.</div>
+      <textarea id="additionalInfo" placeholder="Optional — type here if needed"></textarea>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitSurvey()">Submit My Preferences</button>
+  </div>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">&#10003;</div>
+    <div class="success-title">You're all set!</div>
+    <div class="success-msg">Your holiday preferences have been submitted. Thank you!</div>
+  </div>
+</div>
+
+<script>
+const holidays = [
+  "Memorial Day weekend",
+  "July 4th weekend",
+  "Labor Day weekend",
+  "Thanksgiving",
+  "Black Friday",
+  "Weekend after Thanksgiving",
+  "Christmas Day",
+  "Weekend after Christmas",
+  "New Year's Day"
+];
+
+const listEl = document.getElementById('holidayList');
+holidays.forEach((name, i) => {
+  const row = document.createElement('div');
+  row.className = 'holiday-row';
+  row.id = 'row_' + i;
+  let options = '<option value="">—</option>';
+  for (let n = 1; n <= 9; n++) options += `<option value="${n}">${n}</option>`;
+  row.innerHTML = `
+    <div class="holiday-name">${name}</div>
+    <select class="rank-select" id="rank_${i}" onchange="updateProgress()">${options}</select>
+  `;
+  listEl.appendChild(row);
+});
+
+function updateProgress() {
+  const selects = document.querySelectorAll('.rank-select');
+  const values = [];
+  let filled = 0;
+  selects.forEach(s => {
+    const v = s.value;
+    if (v) { filled++; values.push(v); }
+  });
+
+  document.getElementById('progressText').textContent = `${filled} of 9 ranked`;
+  document.getElementById('progressFill').style.width = `${(filled/9)*100}%`;
+
+  // Check duplicates
+  const counts = {};
+  values.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+  const hasDupes = Object.values(counts).some(c => c > 1);
+
+  selects.forEach((s, i) => {
+    const row = document.getElementById('row_' + i);
+    if (s.value && counts[s.value] > 1) {
+      s.classList.add('duplicate-select');
+      s.classList.remove('filled');
+      row.classList.add('duplicate');
+      row.classList.remove('has-value');
+    } else if (s.value) {
+      s.classList.add('filled');
+      s.classList.remove('duplicate-select');
+      row.classList.add('has-value');
+      row.classList.remove('duplicate');
+    } else {
+      s.classList.remove('filled', 'duplicate-select');
+      row.classList.remove('has-value', 'duplicate');
+    }
+  });
+
+  document.getElementById('rankError').classList.toggle('visible', hasDupes);
+}
+
+async function submitSurvey() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { alert('Please enter your name.'); document.getElementById('nameInput').focus(); return; }
+
+  const rankings = {};
+  let allFilled = true;
+  holidays.forEach((h, i) => {
+    const v = document.getElementById('rank_' + i).value;
+    if (!v) allFilled = false;
+    rankings[h] = v ? parseInt(v) : null;
+  });
+  if (!allFilled) { alert('Please rank all 9 holidays before submitting.'); return; }
+
+  const values = Object.values(rankings);
+  const unique = new Set(values);
+  if (unique.size !== 9) { alert('Each rank (1-9) must be used exactly once. Please fix any duplicates.'); return; }
+
+  const otherDays = [];
+  if (document.getElementById('chk_mothers').checked) otherDays.push("Mother's Day");
+  if (document.getElementById('chk_fathers').checked) otherDays.push("Father's Day");
+  if (document.getElementById('chk_easter').checked) otherDays.push("Easter");
+
+  const additional = document.getElementById('additionalInfo').value.trim();
+
+  const data = { name, rankings, otherDays, additional, submittedAt: new Date().toISOString() };
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+  try {
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Server error');
+    document.getElementById('formContent').classList.add('hidden');
+    document.getElementById('successScreen').classList.add('visible');
+  } catch (e) {
+    alert('There was an error submitting. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Submit My Preferences';
+  }
+}
+</script>
+</body>
+</html>
