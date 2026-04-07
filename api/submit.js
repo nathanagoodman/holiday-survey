@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const filename = `responses/${id}.json`;
 
     const blob = await put(filename, JSON.stringify(data), {
-      access: 'public',
+      access: 'private',
       contentType: 'application/json',
     });
 
