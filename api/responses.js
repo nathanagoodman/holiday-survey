@@ -1,4 +1,4 @@
-import { list, head } from '@vercel/blob';
+import { list, get } from '@vercel/blob';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
@@ -12,8 +12,9 @@ export default async function handler(req, res) {
     const responses = [];
     for (const blob of blobs) {
       try {
-        const r = await fetch(blob.downloadUrl);
-        const data = await r.json();
+        const result = await get(blob.pathname, { access: 'private' });
+        const text = await new Response(result.stream).text();
+        const data = JSON.parse(text);
         responses.push({ id: blob.pathname, ...data });
       } catch (e) {
         console.error('Error reading blob:', blob.pathname, e);
